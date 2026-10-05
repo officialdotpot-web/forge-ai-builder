@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Forge — AI Web Builder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#0f1115;--p:#171a21;--b:#2a2f3a;--t:#e8eaf0;--m:#8b93a7;--a:#7c5cff;--a2:#22d3ee;--r:#ff6b6b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f5f6fa;--p:#fff;--b:#dde0ea;--t:#171a21;--m:#667}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--t);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+button,input,textarea{font:inherit;color:inherit}
+.btn{background:linear-gradient(135deg,var(--a),var(--a2));border:0;color:#fff;padding:9px 16px;border-radius:9px;cursor:pointer;font-weight:600}
+.btn.g{background:var(--p);border:1px solid var(--b);color:var(--t)}.btn:disabled{opacity:.5;cursor:not-allowed}
+input,textarea{width:100%;background:var(--bg);border:1px solid var(--b);border-radius:9px;padding:10px 12px;outline:0}
+input:focus,textarea:focus{border-color:var(--a)}
+#app{height:100%;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--b);background:var(--p);flex-wrap:wrap}
+.logo{font-weight:800;font-size:18px;background:linear-gradient(135deg,var(--a),var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sp{flex:1}.pill{font-size:12px;padding:3px 10px;border-radius:99px;border:1px solid var(--b);color:var(--m)}
+main{flex:1;display:grid;grid-template-columns:minmax(300px,380px) 1fr;min-height:0}
+@media(max-width:760px){main{grid-template-columns:1fr;grid-template-rows:1fr 1fr}}
+.chat{display:flex;flex-direction:column;border-right:1px solid var(--b);min-height:0}
+#msgs{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.m{padding:9px 12px;border-radius:12px;max-width:92%;white-space:pre-wrap;word-wrap:break-word}
+.m.u{background:var(--a);color:#fff;align-self:flex-end}.m.a{background:var(--p);border:1px solid var(--b)}
+.in{display:flex;gap:8px;padding:12px;border-top:1px solid var(--b)}.in textarea{resize:none;height:46px}
+.pv{display:flex;flex-direction:column;min-height:0}
+.tabs{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--b);align-items:center}
+.tab{padding:5px 12px;border-radius:7px;cursor:pointer;color:var(--m);border:0;background:none}.tab.on{background:var(--p);color:var(--t);border:1px solid var(--b)}
+iframe{flex:1;border:0;background:#fff;width:100%}
+#code{flex:1;margin:0;padding:12px;overflow:auto;font:12px/1.5 ui-monospace,Menlo,monospace;white-space:pre;display:none}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9}
+.card{background:var(--p);border:1px solid var(--b);border-radius:16px;padding:22px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:10px;max-height:90%;overflow:auto}
+.card h2{margin:0}.err{color:var(--r);font-size:13px;min-height:18px}.note{font-size:12px;color:var(--m)}
+.code{background:var(--bg);border:1px dashed var(--a);border-radius:9px;padding:10px;text-align:center;font-size:13px}
+.code b{font-size:22px;letter-spacing:4px;color:var(--a2)}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px;border-bottom:1px solid var(--b);text-align:left}
+.hide{display:none!important}
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 8px}.chip{font-size:12px;padding:5px 10px;border-radius:99px;border:1px solid var(--b);background:var(--p);cursor:pointer;color:var(--m)}.chip:hover{border-color:var(--a);color:var(--t)}
+.att{display:flex;gap:8px;flex-wrap:wrap;padding:0 12px}.att:empty{display:none}.at{position:relative;border:1px solid var(--b);border-radius:9px;padding:4px 8px 4px 4px;display:flex;align-items:center;gap:6px;font-size:12px;background:var(--p);max-width:170px}
+.at img{width:32px;height:32px;object-fit:cover;border-radius:6px}.at span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.at b{cursor:pointer;color:var(--r)}
+.ic{background:var(--p);border:1px solid var(--b);border-radius:9px;width:42px;cursor:pointer}
+#stage{flex:1;display:flex;justify-content:center;background:repeating-conic-gradient(var(--p) 0 25%,var(--bg) 0 50%) 0 0/20px 20px;min-height:0}
+#stage iframe{flex:none;height:100%;transition:width .25s}.drop{outline:3px dashed var(--a2);outline-offset:-6px}
+.dev{padding:4px 9px;font-size:12px}.sm{padding:5px 10px;font-size:12px}
+body.home #undo,body.home #redo,body.home #open,body.home #copy,body.home #dl,body.home #newBtn,body.home main{display:none!important}body:not(.home) #home{display:none}
+#home{flex:1;overflow:auto}.hw{max-width:1040px;margin:0 auto;padding:28px 18px 60px}.hw h1{font-size:clamp(26px,5vw,40px);margin:0 0 4px}.hw h3{margin:30px 0 12px;font-size:16px}
+.hbox{background:var(--p);border:1px solid var(--b);border-radius:16px;padding:12px;margin-top:18px;box-shadow:0 8px 30px rgba(124,92,255,.12)}.hbox textarea{border:0;height:84px;resize:none;background:transparent}.hrow{display:flex;gap:10px;align-items:center;padding-top:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.pc,.tc{background:var(--p);border:1px solid var(--b);border-radius:14px;cursor:pointer;overflow:hidden;transition:.15s}.pc:hover,.tc:hover{border-color:var(--a);transform:translateY(-2px)}
+.th{height:130px;overflow:hidden;position:relative;background:#fff}.th iframe{width:1200px;height:780px;transform:scale(.18);transform-origin:0 0;pointer-events:none;border:0;flex:none}
+.pi{padding:10px 12px}.pi b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pa{display:flex;gap:6px;margin-top:8px}
+.tc{padding:14px}.tc .e{font-size:26px}.tc b{display:block;margin-top:4px}
+body.drop::after{content:'⬆ Drop images or files to attach';position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;background:rgba(124,92,255,.4);backdrop-filter:blur(3px);z-index:30;pointer-events:none;color:#fff}
+.sw{display:inline-block;width:56px;height:56px;border-radius:10px;margin:3px;cursor:pointer;border:1px solid var(--b);font-size:9px;color:#fff;text-shadow:0 0 3px #000;text-align:center;line-height:56px}
+.card.w{max-width:780px}.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.pl{border:1px solid var(--b);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px;position:relative}.pl.hot{border-color:var(--a);box-shadow:0 0 0 1px var(--a),0 8px 28px rgba(124,92,255,.25)}
+.pl ul{margin:0;padding-left:18px;font-size:13px;color:var(--m);flex:1}.pl h3{margin:0}.pr{font-size:26px;font-weight:800}.pr small{font-size:12px;color:var(--m);font-weight:400}.tag{position:absolute;top:-10px;right:12px;background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;font-size:11px;padding:2px 10px;border-radius:99px}
+#home{background:radial-gradient(900px 420px at 12% -8%,rgba(124,92,255,.28),transparent 70%),radial-gradient(700px 360px at 95% 0,rgba(34,211,238,.2),transparent 70%)}
+.hw h1{background:linear-gradient(135deg,var(--t),var(--a2) 60%,var(--a));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.hbox:focus-within{border-color:var(--a);box-shadow:0 8px 40px rgba(124,92,255,.3)}
+.tc:hover{box-shadow:0 8px 24px rgba(124,92,255,.22)}.tc.own{border-style:dashed;border-color:var(--a2)}
+.sel{background:var(--p);border:1px solid var(--b);border-radius:9px;padding:6px;color:var(--t);font-size:12px;max-width:190px}
+.dots{display:flex;gap:12px;justify-content:center;margin:8px 0}.dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--a)}.dots i.f{background:var(--a2);border-color:var(--a2)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.pad button{padding:14px;font-size:20px;border-radius:12px;border:1px solid var(--b);background:var(--bg);cursor:pointer}.pad button:active{background:var(--a)}
+.shake{animation:sh .3s}@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+:root[data-theme="light"]{--bg:#f5f6fa;--p:#fff;--b:#dde0ea;--t:#171a21;--m:#667}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--b);font-size:14px}.sh{font-size:11px;letter-spacing:.08em;color:var(--m);margin:10px 0 0}
+</style></head><body>
+<div id="app">
+<header><button class="btn g sm" id="homeBtn">🏠 Home</button><button class="btn g sm" id="upBtn">💎 Plans</button><span class="logo">⚡ Forge</span><span class="pill" id="status"></span><select id="mdl" class="sel" title="Choose AI"></select><span class="sp"></span>
+<button class="btn g hide" id="adminBtn">Admin</button><button class="btn g sm" id="undo" title="Undo">↶</button><button class="btn g sm" id="redo" title="Redo">↷</button><button class="btn g sm hide" id="open">Open ↗</button><button class="btn g sm hide" id="copy">Copy</button><button class="btn g hide" id="dl">Download</button>
+<button class="btn g" id="newBtn">New</button><button class="btn g sm" id="setBtn" title="Settings">⚙️</button><button class="btn" id="authBtn">Sign in</button></header>
+<div id="home"><div class="hw"><h1 id="hg"></h1><div class="note">Describe it, drop in images, and Forge builds it live.</div><div class="stats" id="stats"></div>
+<div class="hbox"><div class="att" id="hatt"></div><textarea id="hin" placeholder="Build me a… (drag & drop images or files anywhere to attach them)"></textarea><div class="hrow"><button class="ic" id="hclip" title="Attach">📎</button><span class="note">Drag &amp; drop works anywhere</span><span class="sp"></span><button class="btn g sm" id="sur">🎲 Surprise me</button><button class="btn" id="hgo">Build it ⚡</button></div></div>
+<h3>📁 Your projects</h3><div class="grid" id="pg"></div><h3>🧩 Start from a template</h3><div class="grid" id="tg"></div><h3>🛠 Tools</h3><div class="grid" id="toolg"></div></div></div>
+<main>
+<section class="chat"><div id="msgs"></div>
+<div class="chips" id="chips"></div><div class="att" id="att"></div>
+<div class="in"><button class="ic" id="clip" title="Attach images or files">📎</button><textarea id="inp" placeholder="Describe what to build, or attach files and tell me what to do with them…"></textarea><button class="btn" id="send">Send</button></div><input type="file" id="file" multiple hidden></section>
+<section class="pv"><div class="tabs"><button class="tab on" data-t="p">Preview</button><button class="tab" data-t="c">Code</button><button class="tab dev" data-w="100%">🖥</button><button class="tab dev" data-w="768px">▭</button><button class="tab dev" data-w="390px">📱</button><span class="sp"></span><span class="note" id="ver"></span></div>
+<div id="stage"><iframe id="frame" sandbox="allow-scripts allow-forms allow-modals" title="preview" style="width:100%"></iframe></div><pre id="code"></pre></section>
+</main>
+<input type="file" id="hfile" multiple hidden></div>
+<div id="modal"></div>
+<script>// ---------- storage (localStorage, guarded) ----------
+const S={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const FREE=5;
+let users=S.get('forge_users',{}), session=S.get('forge_session',null), guestUsed=S.get('forge_guest',0); if(session&&session.admin)session=null;
+let projects=S.get('forge_projects',[]), cur=null, curName='', pending=null, html='', history=[], busy=false, assets={}, assetN=0, attach=[], versions=[], vi=-1, ctrl=null;
+const ADMIN={u:'ADMINREAL',p:'ADMINADMIN11'};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function hash(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('forge:'+s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return btoa(s)}}
+const saveUsers=()=>S.set('forge_users',users);
+
+// ---------- UI ----------
+function addMsg(role,text){const d=document.createElement('div');d.className='m '+role;d.textContent=text;$('msgs').appendChild(d);$('msgs').scrollTop=1e9;return d}
+const plan=()=>{if(!session)return 'guest';if(session.admin)return 'business';const u=users[session.u]||{};if(u.until&&Date.now()>u.until){u.plan='free';u.until=0;saveUsers()}return u.plan||'free'};const paid=()=>plan()==='pro'||plan()==='business';
+const WIN=48*3600*1e3;
+function qState(){if(session&&session.admin||paid())return null;let q;if(session){const h=users[session.u];if(!h)return null;q=h.q=h.q||{n:0,t:0}}else q=S.get('forge_gq',{n:0,t:0});if(q.n&&Date.now()-q.t>WIN){q.n=0;q.t=0}return q}
+const canSend=()=>{const q=qState();return !q||q.n<FREE};
+function useOne(){const q=qState();if(!q)return;if(!q.n)q.t=Date.now();q.n++;if(!session)S.set('forge_gq',q)}
+function qLabel(){const q=qState();if(!q)return session&&session.admin?'Admin · unlimited':plan()+' · unlimited';return (session?'Free':'Guest')+' · '+Math.max(0,FREE-q.n)+'/'+FREE+' messages'+(q.n?' · resets in '+Math.ceil((q.t+WIN-Date.now())/36e5)+'h':'')}
+function refresh(){if($('hg'))$('hg').textContent=session?'Welcome back, '+(session.admin?'Admin':session.u.split('@')[0])+' 👋':'What will you build today?';
+  const s=session; $('authBtn').textContent=s?'Sign out':'Sign in';
+  $('adminBtn').classList.toggle('hide',!(s&&s.admin));
+  $('status').textContent=qLabel();
+}
+function saveProj(){if(!cur||!html)return;const i=projects.findIndex(p=>p.id===cur),p={id:cur,name:curName||'Untitled',html,assets,assetN,updated:Date.now()};i>=0?projects[i]=p:projects.unshift(p);S.set('forge_projects',projects)}
+const rend=(h,a)=>h.replace(/\{\{(IMG\d+)\}\}/g,(m,k)=>a[k]||m);
+const ago=t=>{const m=Math.round((Date.now()-t)/6e4);return m<1?'just now':m<60?m+'m ago':m<1440?Math.round(m/60)+'h ago':Math.round(m/1440)+'d ago'};
+function go(v){document.body.classList.toggle('home',v==='home');if(v==='home')renderHome();else show()}
+function newProject(prompt,files){if(!paid()&&projects.length>=5){return pricing('You\'ve reached 5 saved projects. Upgrade for unlimited, or delete one.')}cur='p'+Date.now();curName='';html='';history=[];assets=files?assets:{};assetN=files?assetN:0;versions=[];vi=-1;$('msgs').innerHTML='';addMsg('a','New project. Describe what to build — attach images or files any time.');go('build');if(prompt){$('inp').value=prompt;send()}}
+function openProject(id){const p=projects.find(x=>x.id===id);if(!p)return;cur=id;curName=p.name;assets=p.assets||{};assetN=p.assetN||0;history=[];versions=[p.html];vi=0;html=p.html;attach=[];renderAtt();$('msgs').innerHTML='';addMsg('a','Opened "'+p.name+'". What should we change?');go('build')}
+const rendered=()=>rend(html,assets);
+function show(){const on=!!html;$('frame').srcdoc=rendered();$('code').textContent=html;['dl','open','copy'].forEach(i=>$(i).classList.toggle('hide',!on));$('ver').textContent=on?(Math.round(html.length/102.4)/10+' KB · v'+(vi+1)+'/'+versions.length):'';$('undo').disabled=vi<=0;$('redo').disabled=vi>=versions.length-1}
+function setHtml(h,push=true){html=h;if(push){versions=versions.slice(0,vi+1);versions.push(h);if(versions.length>30)versions.shift();vi=versions.length-1}show();saveProj()}
+$('undo').onclick=()=>{if(vi>0){vi--;setHtml(versions[vi],false)}};$('redo').onclick=()=>{if(vi<versions.length-1){vi++;setHtml(versions[vi],false)}};
+$('copy').onclick=()=>{try{navigator.clipboard.writeText(rendered());$('copy').textContent='Copied!';setTimeout(()=>$('copy').textContent='Copy',1200)}catch(e){}};
+$('open').onclick=()=>{const w=window.open();if(w){w.document.write(rendered());w.document.close()}};
+function modal(inner){$('modal').innerHTML='<div class="ov"><div class="card">'+inner+'</div></div>'}
+const closeModal=()=>$('modal').innerHTML='';
+
+// ---------- auth ----------
+function authForm(mode,err=''){
+  const up=mode==='up';
+  modal(`<h2>${up?'Create account':'Sign in'}</h2><div class="note">${up?'Create a free account to save your projects.':'Welcome back.'}</div>
+  <input id="e" placeholder="${up?'Email':'Email or username'}" autocomplete="username"><input id="p" type="password" placeholder="Password" autocomplete="${up?'new-password':'current-password'}">
+  <div class="err">${esc(err)}</div><button class="btn" id="go">${up?'Send verification code':'Sign in'}</button>
+  <button class="btn g" id="sw">${up?'I have an account':'Create an account'}</button><button class="btn g" id="x">Close</button>`);
+  $('x').onclick=closeModal;$('sw').onclick=()=>authForm(up?'in':'up');
+  $('go').onclick=()=>up?signUp($('e').value.trim().toLowerCase(),$('p').value):signIn($('e').value.trim(),$('p').value);
+}
+async function signUp(e,p){
+  if(!/^\S+@\S+\.\S+$/.test(e))return authForm('up','Enter a valid email.');
+  if(p.length<8)return authForm('up','Password must be 8+ characters.');
+  if(users[e]&&users[e].verified)return authForm('up','Account exists. Sign in instead.');
+  const code=String(Math.floor(100000+Math.random()*900000));
+  pending={e,h:await hash(p),code};verifyForm();
+}
+function verifyForm(err=''){
+  modal(`<h2>Verify your email</h2><div class="note">We sent a 6-digit code to <b>${esc(pending.e)}</b>. Check your inbox — and your junk/spam folder too.</div>
+  <div class="code">Demo inbox — your code:<br><b>${pending.code}</b><div class="note">Demo mode: this page can't send real email yet, so the code is shown here instead.</div></div>
+  <input id="c" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit code"><div class="err">${esc(err)}</div>
+  <button class="btn" id="go">Verify</button><button class="btn g" id="x">Cancel</button>`);
+  $('x').onclick=closeModal;
+  $('go').onclick=()=>{
+    if($('c').value.trim()!==pending.code)return verifyForm('Wrong code.');
+    users[pending.e]={h:pending.h,verified:true,msgs:0,joined:Date.now()};saveUsers();
+    session={u:pending.e,admin:false};S.set('forge_session',session);pending=null;closeModal();refresh();
+    addMsg('a','✅ Verified! Welcome to Forge. What should we make?');
+  };
+}
+async function signIn(u,p){
+  if(u===ADMIN.u&&p===ADMIN.p){return pinPad(()=>{session={u:ADMIN.u,admin:true};closeModal();refresh();if($('stats'))renderHome();addMsg('a','Welcome back, admin. 🔓')})}
+  const k=u.toLowerCase(),usr=users[k];
+  if(!usr||usr.h!==await hash(p))return authForm('in','Invalid credentials.');
+  session={u:k,admin:false};S.set('forge_session',session);closeModal();refresh();addMsg('a','Signed in. Welcome back!');
+}
+$('authBtn').onclick=()=>{if(session){session=null;S.set('forge_session',null);refresh()}else authForm('in')};
+
+// ---------- admin ----------
+$('adminBtn').onclick=()=>{
+  const rows=Object.entries(users).map(([e,u])=>`<tr><td>${esc(e)}</td><td>${u.plan||'free'}</td><td>${u.msgs||0}</td><td>${u.pay&&u.pay.status==='pending'?`<button class="btn sm" data-ap="${esc(e)}">Accept ${u.pay.plan}</button> <button class="btn g sm" data-dc="${esc(e)}">Decline</button> `:''}<button class="btn g" data-del="${esc(e)}">Delete</button></td></tr>`).join('')||'<tr><td colspan=4 class="note">No users yet.</td></tr>';
+  modal(`<h2>Admin panel</h2><div class="note"><b>Activation key</b> — after a buyer DMs you, generate their key and send it back:</div><input id="ke" placeholder="buyer's email"><select id="kp" class="sel"><option value="pro">Pro</option><option value="business">Business</option></select><button class="btn sm" id="kg">Generate key</button><div id="kout"></div><div class="note">Guest messages used on this device: ${S.get('forge_gq',{n:0}).n}/${FREE}</div>
+  <table><tr><th>User</th><th>Plan</th><th>Msgs</th><th></th></tr>${rows}</table>
+  <button class="btn g" id="rg">Reset guest counter</button><button class="btn g" id="x">Close</button>`);
+  $('x').onclick=closeModal;$('rg').onclick=()=>{S.set('forge_gq',{n:0,t:0});Object.values(users).forEach(u=>u.q={n:0,t:0});saveUsers();refresh();closeModal()};
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{delete users[b.dataset.del];saveUsers();$('adminBtn').click()});$('kg').onclick=async()=>{const e=$('ke').value.trim().toLowerCase();if(!/^\S+@\S+\.\S+$/.test(e))return;const k=await mkKey(e,$('kp').value);$('kout').innerHTML='<div class="note">Send this to the buyer (redeemable for 7 days):</div><textarea readonly rows="3">'+k+'</textarea><button class="btn g sm" id="kc">Copy</button>';$('kc').onclick=()=>{try{navigator.clipboard.writeText(k)}catch(_){}$('kc').textContent='Copied ✓'}};
+  document.querySelectorAll('[data-dc]').forEach(b=>b.onclick=()=>{users[b.dataset.dc].pay=null;saveUsers();$('adminBtn').click()});document.querySelectorAll('[data-ap]').forEach(b=>b.onclick=()=>{const u=users[b.dataset.ap];u.plan=u.pay.plan;u.until=Date.now()+30*864e5;u.pay.status='approved';saveUsers();$('adminBtn').click()});
+};
+
+// ---------- builder ----------
+const SYS=`You are Forge, an elite web developer AI. You build complete, beautiful, fully working single-file web apps/sites.
+Follow the user's instructions EXACTLY and literally: do everything they ask, nothing they didn't, and never change parts they didn't mention. If they give exact text, colors, sizes or layout, use them verbatim.
+RULES: Output ONLY one complete HTML document (<!DOCTYPE html> first) with inline CSS and JS. No markdown fences, no commentary.
+Design: modern, responsive, polished, accessible; real-looking content (no lorem ipsum); smooth micro-interactions; real working JS logic. System fonts or Google Fonts. No external images or APIs (use CSS gradients, emoji, inline SVG). Wrap storage in try/catch.
+ATTACHMENTS: The user may attach images and files and tell you exactly what to do. Follow their instructions precisely. To USE an attached image in the page, put its placeholder token (e.g. {{IMG1}}) as the src/url value exactly as given; never invent data URIs. You can SEE the attached images: study them closely and match their real colors, subject, text and style. Each image's description is also given in text. Attached text files are included below; use their content as instructed.
+QUALITY BAR (apply silently): every button, form, tab, filter and control must actually work with real JS state; handle empty/error states and validation; semantic HTML, keyboard focus styles, ARIA labels; mobile-first responsive layout with fluid type; a deliberate design system (CSS variables, 2 fonts max, consistent radius/spacing, tasteful motion with prefers-reduced-motion respected); polished realistic content; no placeholders, TODOs or dead links; zero console errors; complete code — never truncate or abbreviate with comments like "rest here".
+When given an existing page plus a change request, change only what is asked and return the full updated document.`;
+const CHIPS=['Dark SaaS landing page','Working todo app','Portfolio from my photo','Pomodoro timer','Restaurant menu site','Snake game'];
+$('chips').innerHTML=CHIPS.map(c=>`<span class="chip">${c}</span>`).join('');$('chips').onclick=e=>{if(e.target.className==='chip'){$('inp').value=e.target.textContent;$('inp').focus()}};
+function limitWall(){const q=qState(),l=q?Math.max(1,Math.ceil((q.t+WIN-Date.now())/36e5)):0;modal(`<h2>Message limit reached</h2><div class="note">The free plan includes ${FREE} messages every 48 hours. Yours resets in about <b>${l}h</b>. Upgrade for unlimited messages.</div><button class="btn" id="go">💎 See plans</button><button class="btn g" id="x">Close</button>`);$('x').onclick=closeModal;$('go').onclick=()=>pricing()}
+
+// ---------- attachments ----------
+const TXT=/\.(txt|md|csv|json|html?|css|js|jsx|ts|svg|xml|yml|yaml|py|log)$/i;
+function toDataUrl(file,max=1400){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext('2d').drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);const png=file.type==='image/png';c.toBlob(b=>{const r=new FileReader();r.onload=()=>res({url:r.result,blob:b});r.readAsDataURL(b)},png?'image/png':'image/jpeg',.85)};i.onerror=rej;i.src=u})}
+let noVision=null,warned=false;
+const lib=src=>new Promise((res,rej)=>{const e=document.createElement('script');e.src=src;e.onload=res;e.onerror=rej;document.head.appendChild(e)});
+function imgInfo(url){return new Promise(res=>{const i=new Image();i.onload=()=>{try{const c=document.createElement('canvas');c.width=c.height=48;const x=c.getContext('2d');x.drawImage(i,0,0,48,48);const d=x.getImageData(0,0,48,48).data,m={};let br=0;
+  for(let n=0;n<d.length;n+=4){br+=(d[n]+d[n+1]+d[n+2])/3;const k=[d[n]>>5,d[n+1]>>5,d[n+2]>>5].join();(m[k]=m[k]||{c:0,r:0,g:0,b:0}).c++;m[k].r+=d[n];m[k].g+=d[n+1];m[k].b+=d[n+2]}
+  br/=d.length/4;const top=Object.values(m).sort((a,b)=>b.c-a.c).slice(0,5).map(v=>'#'+[v.r,v.g,v.b].map(q=>Math.round(q/v.c).toString(16).padStart(2,'0')).join(''));
+  res(`${i.naturalWidth}×${i.naturalHeight}px, ${i.width>i.height*1.2?'landscape':i.height>i.width*1.2?'portrait':'roughly square'}, ${br<85?'mostly dark':br>170?'mostly light':'medium brightness'}, dominant colors ${top.join(', ')}`)}catch(e){res('')}};i.onerror=()=>res('');i.src=url})}
+const clean=t=>{let o=t.replace(/^```(?:html)?\s*/i,'').replace(/```\s*$/,'').trim();const i=o.search(/<!doctype|<html/i);return i>0?o.slice(i):o};
+function checkHtml(h){if(!/<\/html>\s*$/i.test(h.trim()))return 'The document is incomplete (missing the closing </html>).';const re=/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/gi;let m;while((m=re.exec(h))){if(/type\s*=\s*["']?(module|application\/json|importmap|text\/template)/i.test(m[1]))continue;try{new Function(m[2])}catch(e){return 'JavaScript syntax error: '+e.message}}return ''}
+function newProjectSilent(){cur='p'+Date.now();curName=''}
+async function addFiles(list){
+  for(const f of [...list]){
+    if(attach.length>=(paid()?8:4)){addMsg('a','Max '+(paid()?8:4)+' attachments per message'+(paid()?'.':' on your plan. Upgrade to Pro for 8.'));break}
+    try{
+      if(/^image\/(png|jpe?g|webp|gif)$/.test(f.type)){const d=await toDataUrl(f);const k='IMG'+(++assetN);assets[k]=d.url;attach.push({kind:'img',name:f.name,key:k,blob:d.blob,url:d.url,info:await imgInfo(d.url)})}
+      else if(TXT.test(f.name)||f.type.startsWith('text/')){if(f.size>150000){addMsg('a',f.name+' is too large (150 KB max for text files).');continue}attach.push({kind:'txt',name:f.name,text:await f.text()})}
+      else if(/\.docx$/i.test(f.name)){if(!window.mammoth)await lib('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');attach.push({kind:'txt',name:f.name,text:(await mammoth.extractRawText({arrayBuffer:await f.arrayBuffer()})).value})}
+      else if(/\.xlsx?$/i.test(f.name)){if(!window.XLSX)await lib('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');const wb=XLSX.read(await f.arrayBuffer());attach.push({kind:'txt',name:f.name,text:wb.SheetNames.map(n=>'## Sheet: '+n+'\n'+XLSX.utils.sheet_to_csv(wb.Sheets[n])).join('\n\n')})}
+      else addMsg('a',"Can't read "+f.name+'. I support images, text/code/data files, Word (.docx) and Excel (.xlsx). PDFs aren\'t supported yet — paste the text instead.');
+    }catch(e){addMsg('a','Could not load '+f.name)}
+  }renderAtt()}
+function renderAtt(){['att','hatt'].forEach(id=>{const c=$(id);c.innerHTML='';attach.forEach((a,i)=>{const d=document.createElement('div');d.className='at';d.innerHTML=(a.kind==='img'?`<img src="${a.url}">`:'📄')+`<span>${esc(a.name)}${a.key?' · '+a.key:''}</span><b data-i="${i}">×</b>`;c.appendChild(d)})})}
+['att','hatt'].forEach(id=>$(id).onclick=e=>{if(e.target.dataset.i){attach.splice(+e.target.dataset.i,1);renderAtt()}});$('hclip').onclick=()=>$('hfile').click();$('hfile').onchange=e=>{addFiles(e.target.files);e.target.value=''};
+$('clip').onclick=()=>$('file').click();$('file').onchange=e=>{addFiles(e.target.files);e.target.value=''};
+$('inp').onpaste=e=>{const f=[...(e.clipboardData?.files||[])];if(f.length){e.preventDefault();addFiles(f)}};
+const dz=document.body;let dc=0;dz.addEventListener('dragenter',e=>{e.preventDefault();dc++;dz.classList.add('drop')});dz.addEventListener('dragover',e=>e.preventDefault());dz.addEventListener('dragleave',e=>{e.preventDefault();if(--dc<=0){dc=0;dz.classList.remove('drop')}});dz.addEventListener('drop',e=>{e.preventDefault();dc=0;dz.classList.remove('drop');if(!$('modal').innerHTML&&e.dataTransfer.files.length)addFiles(e.dataTransfer.files)});// ==================== AI SWAP: now uses local server → Pollinations ====================
+async function makeSample(){
+  return async function(prompt, opts = {}){
+    const body = { prompt };
+    if (opts.images && opts.images.length) {
+      body.images = await Promise.all(opts.images.map(blob => new Promise(res => {
+        const fr = new FileReader();
+        fr.onload = () => res(fr.result);
+        fr.readAsDataURL(blob);
+      })));
+    }
+    const r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: opts.signal
+    });
+    if (!r.ok) {
+      const errText = await r.text().catch(()=> '');
+      throw new Error('AI error ' + r.status + ' ' + errText);
+    }
+    const d = await r.json();
+    if (opts.onText) opts.onText({ text: d.text || '' });
+    return { text: d.text || '', truncated: !!d.truncated };
+  };
+}
+
+// ---------- send ----------
+async function send(){
+  if(busy){ctrl&&ctrl.abort();return}
+  const text=$('inp').value.trim();if(!text&&!attach.length)return;
+  if(!canSend())return limitWall();
+  const sample = await makeSample();
+  const files=attach.slice();attach=[];renderAtt();if(!cur)newProjectSilent();if(!curName)curName=(text||(files[0]&&files[0].name)||'Untitled').slice(0,40);
+  addMsg('u',(files.length?'📎 '+files.map(f=>f.name).join(', ')+'\n':'')+text);$('inp').value='';
+  const imgs=files.filter(f=>f.kind==='img');
+  busy=true;ctrl=new AbortController();$('send').textContent='Stop';
+  if(session){const u=users[session.u];if(u)u.msgs=(u.msgs||0)+1}useOne();saveUsers();
+  refresh();let bub=addMsg('a','Thinking…'),seen=true,M=MODELS[$('mdl').value]||MODELS.auto;if(M.paid&&!paid())M=MODELS.max;
+  const dataBlob=u=>{const [h,b]=u.split(','),bin=atob(b),a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return new Blob([a],{type:h.match(/:(.*?);/)[1]})};
+  if(imgs.length&&noVision===null){try{const l=await sample.limits?.();noVision=l? !l.images : false}catch(e){noVision=false}}
+  if(imgs.length&&noVision){seen=false;if(!warned){warned=true;bub.textContent='⚠️ This view can\'t send images to the AI, so I can\'t truly see them. I\'ll use a local scan of each image — size, brightness and main colors — plus anything you tell me about it.';bub=addMsg('a','Thinking…')}}
+  else if(imgs.length){bub.textContent='👀 Looking at your images…';
+    try{const dr=await sample('You are looking at '+imgs.length+' image(s), in this order: '+imgs.map((f,i)=>`#${i+1} "${f.name}"`).join(', ')+'. For each image write one line starting "#N:" followed by a precise 1-2 sentence description: subject, dominant colors, style, any visible text, mood, aspect ratio. Nothing else.',{cache:false,signal:ctrl.signal,images:imgs.slice(0,5).map(f=>f.blob)});
+      const ls=dr.text.split('\n').map(l=>l.trim());imgs.forEach((f,i)=>{const l=ls.find(x=>x.startsWith('#'+(i+1)+':'));if(l)assets['_d_'+f.key]=l.replace(/^#\d+:\s*/,'')});
+      bub.textContent='👀 I can see:\n'+imgs.map(f=>'• '+f.name+': '+(assets['_d_'+f.key]||'(looked at it, no summary)')).join('\n');bub=addMsg('a','Thinking…');
+    }catch(e){seen=false;noVision=true;bub.textContent='⚠️ I can\'t view images here. I\'ll use a local scan (size, brightness, main colors) plus what you tell me — describe the image in your message.';bub=addMsg('a','Thinking…')}}
+  let att='';imgs.forEach((f,i)=>att+=`Attached image #${i+1} "${f.name}" → placeholder {{${f.key}}}${assets['_d_'+f.key]?' — what it shows: '+assets['_d_'+f.key]:''}${seen?' (the image itself is attached for you to look at)':''}${f.info?' — local scan: '+f.info:''}\n`);
+  files.filter(f=>f.kind==='txt').forEach(f=>att+=`\nATTACHED FILE "${f.name}":\n${f.text.slice(0,60000)}\n`);
+  const known=Object.keys(assets).filter(k=>/^IMG\d+$/.test(k)&&!imgs.some(i=>i.key===k));
+  let spec='';
+  if(M.t==='complex'&&!html&&text){try{bub.textContent='🧭 Planning every requirement…';const pr=await sample('You are a senior product designer and engineer. Turn this request into a precise build spec: (1) a numbered checklist of EVERY explicit requirement, quoting exact text/colors/numbers the user gave; (2) sections and layout; (3) interactions and JS behavior including edge cases; (4) design direction: palette hex codes, font pairing, spacing, motion. Max 350 words.\n\nREQUEST: '+text+(att?'\nATTACHMENTS: '+att:''),{cache:false,signal:ctrl.signal});spec=pr.text.trim()}catch(e){}}
+  const prompt=SYS+(known.length?`\n\nImages already available from earlier: ${known.map(k=>'{{'+k+'}}'+(assets['_d_'+k]?' ('+assets['_d_'+k]+')':'')).join('; ')}`:'')+'\n\n'+history.slice(-6).map(h=>(h.role==='user'?'USER: ':'FORGE: ')+h.content).join('\n')
+    +'\n\n'+(html?`CURRENT PAGE:\n${html}\n\n`:'')+(att?`ATTACHMENTS:\n${att}\n`:'')+'USER REQUEST: '+(text||'(no text — use the attachments sensibly)')+(spec?'\n\nBUILD SPEC — satisfy every item completely:\n'+spec:'');
+  try{
+    const o={cache:false,signal:ctrl.signal,onText:({text})=>{bub.textContent='Building… '+Math.round(text.length/1024*10)/10+' KB'}};
+    if(seen){const bl=[...imgs.map(f=>f.blob)];known.slice(-3).forEach(k=>{try{bl.push(dataBlob(assets[k]))}catch(e){}});if(bl.length)o.images=bl.slice(0,5)}
+    const r=await sample(prompt,o);
+    let out=r.text.replace(/^```(?:html)?\s*/i,'').replace(/```\s*$/,'').trim();
+    const i=out.search(/<!doctype|<html/i);if(i>0)out=out.slice(i);
+    let rr={truncated:r.truncated};
+    if(r.truncated){try{bub.textContent='✂️ Output was long — finishing it…';const c=await sample('The following HTML document was cut off mid-way. Output ONLY the remaining text that continues it exactly from its last character (no repetition, no code fences):\n\n'+out.slice(-6000),{cache:false,signal:ctrl.signal});out+=c.text.replace(/^```(?:html)?\s*/i,'').replace(/```\s*$/,'');rr={truncated:c.truncated}}catch(e){}}
+    for(let n=0;n<2;n++){const er=checkHtml(out);if(!er)break;try{bub.textContent='🛠 Found a problem — auto-fixing ('+(n+1)+'/2)…';const fx=await sample(SYS+'\n\nThis page has a problem: '+er+'\nReturn the COMPLETE corrected HTML document only.\n\n'+out,{cache:false,signal:ctrl.signal});const o3=clean(fx.text);if(!fx.truncated&&o3)out=o3}catch(e){break}}
+    setHtml(out);
+    if(M.review&&!rr.truncated){try{bub.textContent='🔬 Self-reviewing & polishing…';const r2=await sample(SYS+'\n\nThe user asked: '+text+'\n\nHere is the page built so far:\n'+out+'\n\nReview it critically against the request. Return the full improved HTML document only.',{cache:false,signal:ctrl.signal,...(o.images?{images:o.images}:{})});let o2=r2.text.replace(/^```(?:html)?\s*/i,'').replace(/```\s*$/,'').trim();const j=o2.search(/<!doctype|<html/i);if(j>0)o2=o2.slice(j);if(!r2.truncated&&/<\/html>/i.test(o2))setHtml(o2)}catch(e){}}
+    history.push({role:'user',content:text+(files.length?` [attached ${files.map(f=>f.name).join(', ')}]`:'')},{role:'assistant',content:'(built/updated the page)'});
+    bub.textContent=rr.truncated?'Built, but the output was cut off. Try a simpler request or split it into steps.':'Done! ✨ Ask for any change, or attach more files.';if(!rr.truncated)confetti();
+  }catch(e){bub.textContent=(e&&e.name==='AbortError')?'Stopped.':'Something went wrong: '+(e.message||e)+'. Try again.'}
+  busy=false;ctrl=null;$('send').textContent='Send';
+}
+$('send').onclick=send;$('inp').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!busy)send()}};
+$('newBtn').onclick=()=>newProject();$('homeBtn').onclick=()=>go('home');$('hgo').onclick=homeBuild;$('hin').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();homeBuild()}};
+function homeBuild(){const t=$('hin').value.trim();if(!t&&!attach.length)return;$('hin').value='';newProject(t||'Use my attachments to build something great.',attach.length>0)}
+$('dl').onclick=()=>{const blob=new Blob([rendered()],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='site.html';a.click();URL.revokeObjectURL(a.href)};
+document.querySelectorAll('.tab[data-t]').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab[data-t]').forEach(x=>x.classList.toggle('on',x===t));$('stage').style.display=t.dataset.t==='p'?'':'none';$('code').style.display=t.dataset.t==='c'?'block':'none'});
+document.querySelectorAll('.dev').forEach(b=>b.onclick=()=>{document.querySelectorAll('.dev').forEach(x=>x.classList.toggle('on',x===b));$('frame').style.width=b.dataset.w});
+addMsg('a','Hey! Describe any website or web app and I\'ll build it live. Try: "a dark landing page for a coffee shop with a menu and contact form" or "a working pomodoro timer".');
+refresh();
+
+// ---------- home ----------
+const TPL=[['✨','Your own idea — start from scratch',''],['🚀','SaaS landing page','A sleek dark SaaS landing page with hero, features grid, pricing tiers, FAQ accordion and email signup'],['🛍','Online store','A modern product store with grid, working cart drawer, quantity controls and checkout summary'],['📸','Photo portfolio','A minimal photographer portfolio with masonry gallery, lightbox and contact section'],['✅','Task manager','A beautiful kanban task board with drag and drop columns, add/edit/delete tasks and filters'],['🍕','Restaurant site','A restaurant website with menu tabs, reservation form, hours and testimonials'],['📊','Analytics dashboard','A dashboard with KPI cards, SVG charts, sortable table and dark/light toggle'],['🎮','Arcade game','A polished playable snake game with score, levels, sound-free juicy effects and restart'],['💌','Wedding invite','An elegant animated wedding invitation with countdown, RSVP form and schedule']];
+function renderHome(){
+  refresh();$('stats').innerHTML=`<span class="pill">📁 ${projects.length} project${projects.length==1?'':'s'}</span><span class="pill">💎 ${plan()} plan</span>`+(plan()==='business'?'<button class="btn g sm" id="exp">⬇ Export all</button>':'');
+  $('pg').innerHTML=projects.length?projects.map(p=>`<div class="pc" data-o="${p.id}"><div class="th"><iframe sandbox tabindex="-1" srcdoc="${esc(rend(p.html,p.assets||{}))}"></iframe></div><div class="pi"><b>${esc(p.name)}</b><span class="note">${ago(p.updated)}</span><div class="pa"><button class="btn g sm" data-d="${p.id}">Duplicate</button><button class="btn g sm" data-x="${p.id}">Delete</button></div></div></div>`).join(''):'<div class="note">No projects yet — describe something above or pick a template.</div>';
+  $('tg').innerHTML=TPL.map((t,i)=>`<div class="tc${t[2]?'':' own'}" data-t="${i}"><div class="e">${t[0]}</div><b>${t[1]}</b></div>`).join('');
+  $('toolg').innerHTML=TOOLS.map((t,i)=>`<div class="tc" data-k="${i}"><div class="e">${t.i}</div><b>${t.n}</b><span class="note">${t.d}</span></div>`).join('');
+}
+document.addEventListener('click',e=>{
+  const g=a=>{const n=e.target.closest('['+a+']');return n&&n.getAttribute(a)};
+  const d=g('data-d'),x=g('data-x'),o=g('data-o'),t=g('data-t'),k=g('data-k');
+  if(d){const p=projects.find(q=>q.id===d);projects.unshift({...p,id:'p'+Date.now(),name:p.name+' copy',updated:Date.now()});S.set('forge_projects',projects);renderHome()}
+  else if(x){danger('Delete this project?','This permanently removes the project and its images from this device.','',()=>{projects=projects.filter(q=>q.id!==x);S.set('forge_projects',projects);renderHome()})}
+  else if(o)openProject(o);
+  else if(t!==null&&t!==undefined&&e.target.closest('#tg'))newProject(TPL[+t][2]);
+  else if(k!==null&&k!==undefined)TOOLS[+k].f();
+});
+// ---------- tools ----------
+const tm=(title,body)=>{modal(`<h2>${title}</h2>${body}<button class="btn g" id="x">Close</button>`);$('x').onclick=closeModal};
+const pickImg=f=>new Promise((res,rej)=>{const u=URL.createObjectURL(f),i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=u});
+async function spend(){if(!canSend()){limitWall();return null}const sm=await makeSample();if(!sm){alert('AI is unavailable.');return null}
+  if(session){const u=users[session.u];if(u)u.msgs=(u.msgs||0)+1}useOne();saveUsers();refresh();return sm}
+const save=async(name,data)=>{const a=document.createElement('a');a.href=URL.createObjectURL(data);a.download=name;a.click();URL.revokeObjectURL(a.href)};
+function toolPalette(){tm('🎨 Palette from image','<input type="file" id="f" accept="image/*"><div id="o" class="note" style="margin-top:8px">Pick an image to extract its colors. Click a swatch to copy.</div>');
+  $('f').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const i=await pickImg(f),c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.drawImage(i,0,0,64,64);const dta=x.getImageData(0,0,64,64).data,m={};
+    for(let n=0;n<dta.length;n+=4){const k=[dta[n]>>5,dta[n+1]>>5,dta[n+2]>>5].join();(m[k]=m[k]||{c:0,r:0,g:0,b:0}).c++;m[k].r+=dta[n];m[k].g+=dta[n+1];m[k].b+=dta[n+2]}
+    const top=Object.values(m).sort((a,b)=>b.c-a.c).slice(0,8).map(v=>'#'+[v.r,v.g,v.b].map(q=>Math.round(q/v.c).toString(16).padStart(2,'0')).join(''));
+    $('o').innerHTML=top.map(h=>`<span class="sw" style="background:${h}" data-h="${h}">${h}</span>`).join('');$('o').onclick=ev=>{if(ev.target.dataset.h){try{navigator.clipboard.writeText(ev.target.dataset.h)}catch(_){}ev.target.textContent='copied'}}}catch(_){$('o').textContent='Could not read that image.'}}}
+function toolResize(){tm('🗜 Image resizer','<input type="file" id="f" accept="image/*"><label class="note">Max width (px)</label><input id="w" type="number" value="1280"><label class="note">Quality 10–100</label><input id="q" type="number" value="80"><div class="err" id="o"></div><button class="btn" id="go">Resize &amp; save</button>');
+  $('go').onclick=async()=>{const f=$('f').files[0];if(!f)return $('o').textContent='Choose an image first.';const i=await pickImg(f),w=Math.min(+$('w').value||1280,i.width),h=Math.round(i.height*w/i.width),c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(i,0,0,w,h);
+    c.toBlob(async b=>{$('o').style.color='var(--a2)';$('o').textContent=`${Math.round(f.size/1024)} KB → ${Math.round(b.size/1024)} KB (${w}×${h})`;await save('resized.jpg',b)},'image/jpeg',Math.min(100,Math.max(10,+$('q').value||80))/100)}}
+function toolFav(){tm('😀 Favicon maker','<input id="em" value="⚡" maxlength="4"><input id="bg" type="color" value="#7c5cff"><button class="btn" id="go">Save 512px PNG</button>');
+  $('go').onclick=()=>{const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');x.fillStyle=$('bg').value;x.beginPath();x.roundRect(0,0,512,512,110);x.fill();x.font='300px serif';x.textAlign='center';x.textBaseline='middle';x.fillText($('em').value||'⚡',256,280);c.toBlob(b=>save('favicon.png',b))}}
+function aiTool(title,ph,instr,out){tm(title,`<textarea id="i" rows="5" placeholder="${ph}"></textarea><button class="btn" id="go">Run ✨</button><div class="m a" id="o" style="white-space:pre-wrap;display:none"></div><div id="ex"></div>`);
+  $('go').onclick=async()=>{const v=$('i').value.trim();if(!v)return;const sm=await spend();if(!sm)return;$('o').style.display='block';$('o').textContent='Thinking…';$('go').disabled=true;
+    try{const r=await sm(instr+'\n\nINPUT:\n'+v,{cache:false,onText:({text})=>$('o').textContent=text});let t=r.text.trim();if(out==='html'){t=t.replace(/^```(?:html)?\s*/i,'').replace(/```\s*$/,'');const i=t.search(/<!doctype|<html/i);if(i>0)t=t.slice(i);$('o').textContent='Fixed! '+Math.round(t.length/1024)+' KB';$('ex').innerHTML='<button class="btn" id="ob">Open in builder</button>';$('ob').onclick=()=>{closeModal();newProjectSilent();curName='Fixed page';assets={};assetN=0;history=[];versions=[];vi=-1;$('msgs').innerHTML='';addMsg('a','Loaded your fixed page. What next?');go('build');setHtml(t)}}
+      else if(out==='prompt'){$('ex').innerHTML='<button class="btn" id="ob">Build this</button>';$('ob').onclick=()=>{closeModal();newProject(t)}}}catch(e){$('o').textContent='Something went wrong.'}$('go').disabled=false}}
+const toolPrompt=()=>aiTool('✨ Prompt improver','Rough idea, e.g. "gym website"','Rewrite this rough idea as one detailed, specific prompt for an AI web builder: purpose, audience, sections, features, style/colors, interactions. Output only the prompt.','prompt');
+const toolCopy=()=>aiTool('✍️ Copywriter','Describe your business or project…','Write punchy website copy: 5 headline options, a tagline, a 2-sentence hero subtext, 3 feature blurbs, an About paragraph and 3 call-to-action button labels. Plain text, clearly labeled.','text');
+const toolFix=()=>aiTool('🐞 Fix my code','Paste your HTML/CSS/JS here…','Fix every bug in this web page, make it responsive and polished, keep its purpose. Output ONLY the complete corrected HTML document.','html');
+function toolImport(){tm('📥 Import HTML','<textarea id="i" rows="6" placeholder="Paste a full HTML page…"></textarea><input type="file" id="f" accept=".html,.htm"><button class="btn" id="go">Open in builder</button>');
+  const run=t=>{closeModal();newProjectSilent();curName='Imported page';assets={};assetN=0;history=[];versions=[];vi=-1;$('msgs').innerHTML='';addMsg('a','Imported! Tell me what to change.');go('build');setHtml(t)};
+  $('f').onchange=async e=>{const f=e.target.files[0];if(f)run(await f.text())};$('go').onclick=()=>{const t=$('i').value.trim();if(t)run(t)}}
+const TOOLS=[{i:'🎨',n:'Palette from image',d:'Extract main colors',f:toolPalette},{i:'🗜',n:'Image resizer',d:'Shrink & compress',f:toolResize},{i:'😀',n:'Favicon maker',d:'Emoji to icon PNG',f:toolFav},{i:'✨',n:'Prompt improver',d:'AI sharpens your idea',f:toolPrompt},{i:'✍️',n:'Copywriter',d:'AI headlines & copy',f:toolCopy},{i:'🐞',n:'Fix my code',d:'AI repairs your HTML',f:toolFix},{i:'📥',n:'Import HTML',d:'Edit an existing page',f:toolImport}];
+
+// ---------- plans ----------
+const PLANS=[{k:'free',n:'Free',pr:'$0',d:'Everything to get started',u:['5 messages every 48 hours','5 saved projects','Strong AI (Auto mode)','4 attachments per message','All tools & templates']},
+{k:'pro',n:'Pro',pr:'$12',d:'For serious builders',hot:1,u:['Unlimited messages','Unlimited saved projects','🔥 Ultra mode: AI builds, then reviews & fixes its own work','8 attachments per message','Everything in Free']},
+{k:'business',n:'Business',pr:'$29',d:'For teams & agencies',u:['Everything in Pro','Export all projects (JSON)','Priority for new features']}];
+function pricing(msg=''){let cur=plan(),py=session&&users[session.u]&&users[session.u].pay,pend=py&&py.status==='pending'?`<div class="err" style="color:var(--a2)">⏳ Your ${py.plan} payment is pending — DM me on TikTok to get your key.</div>`:'';let ac=session&&users[session.u]&&users[session.u].until;if(ac&&paid())pend+=`<div class="note">✅ Active until ${new Date(ac).toLocaleDateString()}. Plans last 30 days — renew to keep it.</div>`;
+  modal(`<h2>💎 Plans</h2>${msg?`<div class="err">${esc(msg)}</div>`:''}<div class="plans">${PLANS.map(x=>`<div class="pl${x.hot?' hot':''}">${x.hot?'<span class="tag">Most popular</span>':''}<h3>${x.n}</h3><div class="pr">${x.pr}<small>/mo</small></div><div class="note">${x.d}</div><ul>${x.u.map(i=>`<li>${i}</li>`).join('')}</ul><button class="btn${cur===x.k||(cur==='guest'&&x.k==='free')?' g':''}" data-plan="${x.k}"${cur===x.k?' disabled':''}>${cur===x.k?'Current plan':x.k==='free'?'Choose Free':'Get '+x.n}</button></div>`).join('')}</div>
+  ${pend}<div class="note">💸 Pay with Cash App, then DM the owner on TikTok to get your activation key. Plans last 30 days.</div><button class="btn g" id="kb">🔑 I have an activation key</button><button class="btn g" id="x">Close</button>`);
+  document.querySelector('#modal .card').classList.add('w');$('x').onclick=closeModal;$('kb').onclick=()=>session&&!session.admin?keyForm():authForm('up');
+  document.querySelectorAll('[data-plan]').forEach(b=>b.onclick=()=>{if(!session)return authForm('up');if(session.admin)return;const k=b.dataset.plan;if(k==='free'){users[session.u].plan='free';saveUsers();refresh();if($('stats'))renderHome();pricing('')}else payFlow(k)})}
+$('upBtn').onclick=()=>pricing();
+document.addEventListener('click',e=>{if(e.target.id==='exp')save('forge-projects.json',new Blob([JSON.stringify(projects)],{type:'application/json'}))});
+const IDEAS=['A neon cyberpunk portfolio with a glitch hero','A cozy bakery site with an order form','A habit tracker with streaks and confetti','A crypto price dashboard with animated charts','A band landing page with tour dates and a music player UI','A recipe finder with ingredient filters'];
+$('sur').onclick=()=>{$('hin').value=IDEAS[Math.floor(Math.random()*IDEAS.length)];$('hin').focus()};
+let pi=0;setInterval(()=>{if(document.activeElement!==$('hin')&&!$('hin').value){$('hin').placeholder='Try: '+IDEAS[pi++%IDEAS.length]+'…'}},3000);
+
+function payFlow(k){const amt=k==='pro'?12:29,em=esc(session.u);
+  modal(`<h2>💸 Pay with Cash App</h2><div class="note">${k==='pro'?'Pro':'Business'} plan · <b>$${amt}/month</b></div>
+  <ol class="note" style="padding-left:18px;margin:0"><li>Tap the button to open Cash App.</li><li>Send <b>$${amt}</b> and put <b>${em}</b> in the note.</li><li>Come back and tap "I've sent it".</li></ol>
+  <a class="btn" style="text-align:center;text-decoration:none" target="_blank" rel="noopener" href="https://cash.app/$REALLYBEN1/${amt}">Open Cash App · $REALLYBEN1</a>
+  <button class="btn g" id="paid">✅ I've sent it</button><button class="btn g" id="x">Back</button>`);
+  $('x').onclick=()=>pricing();$('paid').onclick=()=>{users[session.u].pay={plan:k,at:Date.now(),status:'pending'};saveUsers();dmScreen(k)}}
+let pinLock=0,pinFails=0;
+function pinPad(ok){if(Date.now()<pinLock){return authForm('in','Too many wrong PINs. Try again in '+Math.ceil((pinLock-Date.now())/1000)+'s.')}
+  let pin='';modal(`<h2>🔐 Admin PIN</h2><div class="note">Enter the 4-digit code. Your keyboard works too.</div><div class="dots" id="dots"><i></i><i></i><i></i><i></i></div><div class="pad">${[1,2,3,4,5,6,7,8,9,'⌫',0,'✓'].map(n=>`<button data-k="${n}">${n}</button>`).join('')}</div><button class="btn g" id="x">Cancel</button>`);
+  $('x').onclick=()=>{document.removeEventListener('keydown',kd);closeModal()};
+  const draw=()=>document.querySelectorAll('#dots i').forEach((d,i)=>d.classList.toggle('f',i<pin.length));
+  const press=k=>{if(k==='⌫'||k==='Backspace')pin=pin.slice(0,-1);else if(/^\d$/.test(k)&&pin.length<4)pin+=k;draw();
+    if(pin.length===4&&(k==='✓'||k==='Enter'||/^\d$/.test(k))){if(pin==='0929'){document.removeEventListener('keydown',kd);pinFails=0;ok()}else{const c=document.querySelector('#modal .card');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');pin='';draw();if(++pinFails>=5){pinLock=Date.now()+30000;pinFails=0;document.removeEventListener('keydown',kd);authForm('in','Too many wrong PINs. Locked for 30s.')}}}};
+  function kd(e){if(!$('dots')){document.removeEventListener('keydown',kd);return}if(e.key==='Escape')return $('x').onclick();if(/^(\d|Backspace|Enter)$/.test(e.key)){e.preventDefault();press(e.key)}}
+  document.addEventListener('keydown',kd);document.querySelectorAll('.pad button').forEach(b=>b.onclick=()=>press(b.dataset.k))}
+const MODELS={auto:{n:'🤖 Auto · plans, builds & self-checks',t:'complex'},fast:{n:'⚡ Fast',t:'quick'},bal:{n:'⚖️ Balanced',t:'default'},max:{n:'🧠 Strongest',t:'complex'},ultra:{n:'🔥 Ultra · build + self-review (Pro)',t:'complex',review:1,paid:1}};
+$('mdl').innerHTML=Object.entries(MODELS).map(([k,m])=>`<option value="${k}">${m.n}</option>`).join('');$('mdl').value=S.get('forge_model','auto');if(!MODELS[$('mdl').value])$('mdl').value='auto';
+$('mdl').onchange=()=>{if(MODELS[$('mdl').value].paid&&!paid()){$('mdl').value='auto';return pricing('Ultra mode is a Pro feature.')}S.set('forge_model',$('mdl').value)};
+function confetti(){if(!S.get('forge_set',{fx:true}).fx)return;for(let i=0;i<24;i++){const e=document.createElement('span');e.textContent=['🎉','✨','⚡','💜'][i%4];e.style.cssText=`position:fixed;left:${Math.random()*100}vw;top:-20px;font-size:${14+Math.random()*16}px;z-index:40;pointer-events:none;transition:transform 1.6s ease-in,opacity 1.6s`;document.body.appendChild(e);requestAnimationFrame(()=>{e.style.transform=`translateY(${105+Math.random()*10}vh) rotate(${Math.random()*540}deg)`;e.style.opacity=0});setTimeout(()=>e.remove(),1700)}}
+
+const SALT='forge-k-9f3a71',TT='https://www.tiktok.com/@benfnmyguy';
+const b64=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const unb=t=>JSON.parse(decodeURIComponent(escape(atob(t.replace(/-/g,'+').replace(/_/g,'/')))));
+async function mkKey(e,pl){const t=b64({e,p:pl,r:Date.now()+7*864e5});return 'FORGE-'+t+'.'+(await hash(t+SALT)).slice(0,10)}
+const KP=new Set([]);
+const KB=new Set([]);
+function grant(pl){const u=users[session.u];u.plan=pl;u.until=Date.now()+30*864e5;u.pay=null;saveUsers()}
+async function useKey(raw){if(!session||session.admin||!users[session.u])return 'Sign in with a normal account first.';
+  const k=raw.trim().toUpperCase().replace(/\s+/g,'');
+  try{const [t,h]=raw.trim().replace(/^FORGE-/,'').split('.');if(h!==(await hash(t+SALT)).slice(0,10))return 'Invalid key.';const o=unb(t);if(Date.now()>o.r)return 'This key has expired — ask for a new one.';if(o.e!==session.u)return 'This key was made for a different email.';const us=S.get('forge_used',[]);if(us.includes('L'+h))return 'This key has already been used.';us.push('L'+h);S.set('forge_used',us);grant(o.p);return ''}catch(e){return 'Invalid key.'}}
+function dmScreen(k){const msg=`Hi! I just paid for Forge ${k==='pro'?'Pro':'Business'}. My email: ${session.u}`;
+  modal(`<h2>✅ Last step: DM me on TikTok</h2><div class="note">Send me a DM with your payment screenshot and this message. I'll reply with an activation key.</div><textarea readonly rows="2">${esc(msg)}</textarea><button class="btn g" id="cp">Copy message</button>
+  <a class="btn" style="text-align:center;text-decoration:none" target="_blank" rel="noopener" href="${TT}">Open TikTok · @benfnmyguy</a><button class="btn g" id="kb">🔑 I got my key</button><button class="btn g" id="x">Close</button>`);
+  $('cp').onclick=()=>{try{navigator.clipboard.writeText(msg)}catch(_){}$('cp').textContent='Copied ✓'};$('x').onclick=closeModal;$('kb').onclick=keyForm}
+function keyForm(err=''){modal(`<h2>🔑 Activation key</h2><div class="note">Paste the key I sent you on TikTok.</div><textarea id="k" rows="3" placeholder="FORGE-…"></textarea><div class="err">${esc(err)}</div><button class="btn" id="go">Activate</button><button class="btn g" id="x">Cancel</button>`);
+  $('x').onclick=closeModal;$('go').onclick=async()=>{const e=await useKey($('k').value);if(e)return keyForm(e);refresh();if($('stats'))renderHome();pricing('Plan activated! 🎉 Enjoy.')}}
+
+function danger(title,body,word,yes,back){modal(`<h2 style="color:var(--r)">⚠️ READ THIS — IMPORTANT</h2><div style="background:rgba(255,107,107,.12);border:1px solid var(--r);border-radius:10px;padding:10px"><b>${title}</b></div><div style="font-size:14px">${body}</div>${word?`<div class="note">Type <b>${word}</b> to confirm:</div><input id="dw" autocomplete="off">`:''}<button class="btn" id="dy" style="background:var(--r)"${word?' disabled':''}>I understand — do it</button><button class="btn g" id="x">Go back</button>`);
+  if(word)$('dw').oninput=()=>{$('dy').disabled=$('dw').value.trim().toUpperCase()!==word};$('x').onclick=back||closeModal;$('dy').onclick=()=>{closeModal();yes()}}
+const applyTheme=()=>{const t=S.get('forge_set',{}).theme;t&&t!=='auto'?document.documentElement.dataset.theme=t:delete document.documentElement.dataset.theme};applyTheme();
+function settings(){const st=S.get('forge_set',{theme:'auto',fx:true}),u=session&&!session.admin?users[session.u]:null,pl=plan();
+  modal(`<h2>⚙️ Settings</h2><div class="sh">ACCOUNT</div><div class="row"><span>Signed in as</span><b>${session?esc(session.u):'Guest'}</b></div><div class="row"><span>Plan</span><b>${pl}</b></div>${u&&u.until&&paid()?`<div class="row"><span>Plan ends</span><b>${new Date(u.until).toLocaleDateString()}</b></div>`:''}<div class="row"><span>Messages</span><b>${esc(qLabel())}</b></div><div class="row"><span>Projects</span><b>${projects.length}${paid()?'':' / 5'}</b></div>
+  <div class="sh">APPEARANCE</div><div class="row"><span>Theme</span><select id="th" class="sel"><option value="auto">Auto</option><option value="dark">Dark</option><option value="light">Light</option></select></div><div class="row"><span>Confetti &amp; effects</span><input id="fx" type="checkbox" style="width:auto"${st.fx!==false?' checked':''}></div>
+  <div class="sh">YOUR DATA</div><div class="row"><span>Export projects${pl==='business'?'':' (Business)'}</span><button class="btn g sm" id="ex"${pl==='business'?'':' disabled'}>Export</button></div><div class="row"><span>Import projects</span><button class="btn g sm" id="im">Import</button></div><div class="row"><span>Delete all projects</span><button class="btn g sm" id="da">Delete…</button></div>
+  <div class="sh">PLAN</div><div class="row"><span>Activation key</span><button class="btn g sm" id="rk">Redeem</button></div>${paid()&&u?'<div class="row"><span>Cancel my plan</span><button class="btn g sm" id="cp" style="color:var(--r)">Cancel…</button></div>':''}<div class="row"><span>Plans &amp; pricing</span><button class="btn g sm" id="pp">View</button></div>
+  <div class="sh">HELP</div><div class="row"><span>Support / payments</span><a href="${TT}" target="_blank" rel="noopener" style="color:var(--a2)">TikTok DM</a></div>${session?'<div class="row"><span>Account</span><button class="btn g sm" id="so">Sign out</button></div>':''}
+  <input type="file" id="imf" accept=".json" hidden><button class="btn g" id="x">Close</button>`);
+  $('th').value=st.theme||'auto';$('x').onclick=closeModal;
+  const sv=o=>S.set('forge_set',{...S.get('forge_set',{}),...o});$('th').onchange=()=>{sv({theme:$('th').value});applyTheme()};$('fx').onchange=()=>sv({fx:$('fx').checked});
+  $('ex').onclick=()=>save('forge-projects.json',new Blob([JSON.stringify(projects)],{type:'application/json'}));
+  $('im').onclick=()=>$('imf').click();$('imf').onchange=async e=>{try{const a=JSON.parse(await e.target.files[0].text());if(!Array.isArray(a))throw 0;const ids=new Set(projects.map(p=>p.id));projects=[...a.filter(p=>p&&p.id&&p.html&&!ids.has(p.id)),...projects].slice(0,paid()?1e9:5);S.set('forge_projects',projects);settings()}catch(_){alert('That file is not a valid Forge export.')}};
+  $('da').onclick=()=>danger('Delete ALL your projects?','<ul><li>Every saved project and its images is erased from this device.</li><li>This <b>cannot</b> be undone.</li></ul>','DELETE',()=>{projects=[];S.set('forge_projects',projects);if($('pg'))renderHome();settings()},settings);
+  $('rk').onclick=()=>session&&!session.admin?keyForm():authForm('up');$('pp').onclick=()=>pricing();if($('so'))$('so').onclick=()=>{session=null;S.set('forge_session',null);closeModal();refresh();go('home')};
+  if($('cp'))$('cp').onclick=()=>danger('You are about to cancel your '+pl.toUpperCase()+' plan.','<ul><li>Your plan ends <b>immediately</b>. <b>No refund</b> for the time left.</li><li>You go back to <b>Free</b>: 5 messages every 48 hours.</li><li>Ultra mode, unlimited messages and extra attachments turn off.</li><li>Your projects stay, but you can\'t create new ones while you have 5 or more.</li><li>The key you used is already spent and <b>can\'t be used again</b>. To come back you\'ll need a new key.</li></ul>','CANCEL',()=>{u.plan='free';u.until=0;saveUsers();refresh();if($('stats'))renderHome();settings()},settings)}
+$('setBtn').onclick=settings;
+go('home');
+</script></body></html>
